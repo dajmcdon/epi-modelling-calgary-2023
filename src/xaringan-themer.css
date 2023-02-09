@@ -15,21 +15,21 @@
  *    - xaringan wiki: https://github.com/yihui/xaringan/wiki
  *    - remarkjs wiki: https://github.com/gnab/remark/wiki
  *
- *  Version: 0.4.1
+ *  Version: 0.4.2
  *
  * ------------------------------------------------------- */
-@import url(https://fonts.googleapis.com/css?family=Open+Sans&display=swap);
-@import url(https://fonts.googleapis.com/css?family=EB+Garamond&display=swap);
+@import url(https://fonts.googleapis.com/css?family=Montserrat&display=swap);
+@import url(https://fonts.googleapis.com/css?family=Cormorant+Garamond&display=swap);
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono&display=swap);
 
 
 :root {
   /* Fonts */
-  --text-font-family: 'Open Sans';
+  --text-font-family: Montserrat;
   --text-font-is-google: 1;
   --text-font-family-fallback: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, Ubuntu, roboto, noto, segoe ui, arial;
   --text-font-base: sans-serif;
-  --header-font-family: 'EB Garamond';
+  --header-font-family: 'Cormorant Garamond';
   --header-font-is-google: 1;
   --header-font-family-fallback: Georgia, serif;
   --code-font-family: 'Fira Mono';
@@ -50,7 +50,7 @@
   --text-bold-color: #002145;
   --code-highlight-color: rgba(255,255,0,0.5);
   --inverse-text-color: #000000;
-  --inverse-background-color: #6495ed;
+  --inverse-background-color: #ffa319;
   --inverse-header-color: #000000;
   --inverse-link-color: #002145;
   --title-slide-background-color: #002145;
@@ -58,14 +58,14 @@
   --header-background-color: #002145;
   --header-background-text-color: #FFFFFF;
   --primary: #002145;
-  --secondary: #6495ed;
+  --secondary: #ffa319;
   --white: #FFFFFF;
   --black: #000000;
-  --tertiary: #ffa319;
+  --tertiary: #6495ed;
   --fourth_color: #DB0B5B;
   --light_pri: #CCD2D9;
-  --light_sec: #E0E9FB;
-  --light_ter: #FFECD1;
+  --light_sec: #FFECD1;
+  --light_ter: #E0E9FB;
   --light_fou: #F7CEDE;
 }
 
@@ -183,7 +183,7 @@ img, video, iframe {
   max-width: 100%;
 }
 blockquote {
-  border-left: solid 5px #6495ed80;
+  border-left: solid 5px #ffa31980;
   padding-left: 1em;
 }
 .remark-slide table {
@@ -197,7 +197,9 @@ blockquote {
 th, td {
   padding: 5px;
 }
-.remark-slide thead, .remark-slide tfoot, .remark-slide tr:nth-child(even) {
+.remark-slide table:not(.table-unshaded) thead,
+.remark-slide table:not(.table-unshaded) tfoot,
+.remark-slide table:not(.table-unshaded) tr:nth-child(even) {
   background: #CCD2D9;
 }
 table.dataTable tbody {

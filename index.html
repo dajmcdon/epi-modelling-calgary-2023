@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Statistical approaches to epidemic forecasting</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Daniel J. McDonald" />
+    <meta name="date" content="2023-02-10" />
+    <script src="index_files/header-attrs/header-attrs.js"></script>
+    <script src="index_files/fabric/fabric.min.js"></script>
+    <link href="index_files/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="index_files/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#ffa319"],"pen_size":3,"eraser_size":30,"palette":["#002145","#ffa319","#6495ed","#DB0B5B","#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#FFFF33"]}) })</script>
+    <script src="index_files/htmlwidgets/htmlwidgets.js"></script>
+    <script src="index_files/pymjs/pym.v1.js"></script>
+    <script src="index_files/widgetframe-binding/widgetframe.js"></script>
+    <link rel="stylesheet" href="src/xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="src/slides-style.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+
+
+
+
+layout: true
+
+&lt;div class="my-footer"&gt;&lt;span&gt;&lt;a href="https://dajmcdon.github.io/epi-modelling-calgary-2023" style="color:white"&gt;dajmcdon.github.io/epi-modelling-calgary-2023&lt;/a&gt;&lt;/span&gt;&lt;/div&gt; 
+
+---
+background-image: url("gfx/cover-1.svg")
+background-size: contain
+background-position: top
+
+&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+
+
+
+
+# Statistical approaches to epidemic forecasting
+
+## <svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#ffa319;overflow:visible;position:relative;"><path d="M392.8 1.2c-17-4.9-34.7 5-39.6 22l-128 448c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l128-448c4.9-17-5-34.7-22-39.6zm80.6 120.1c-12.5 12.5-12.5 32.8 0 45.3L562.7 256l-89.4 89.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l112-112c12.5-12.5 12.5-32.8 0-45.3l-112-112c-12.5-12.5-32.8-12.5-45.3 0zm-306.7 0c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3l112 112c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256l89.4-89.4c12.5-12.5 12.5-32.8 0-45.3z"/></svg> Evaluation and software
+
+&lt;br&gt;
+
+###Daniel J. McDonald
+###University of British Columbia
+#### &amp;nbsp;10 February 2023
+
+---
+
+## Mathematical modelling of disease / epidemics is very old 
+
+* .tertiary[Daniel Bernoulli (1760)] - studies inoculation against smallpox
+
+* .tertiary[John Snow (1855)] - cholera epidemic in London tied to a water pump
+
+* .tertiary[Ronald Ross (1902)] - Nobel Prize in Medicine for work on malaria
+
+* .tertiary[Kermack and McKendrick (1927-1933)] - basic epidemic (mathematical) model
+
+.center[
+![:scale 50%](https://www-tc.pbs.org/wgbh/masterpiece/wp-content/uploads/2019/02/victoria-s3-e4-historical-01-3200x1800.jpg)
+]
+
+---
+
+## Forecasting is also old, but not that old
+
+### US CDC Flu Challenge began in 2013
+
+.center[
+![:scale 60%](https://www.cdc.gov/flu/images/weekly/flu-forecasting.jpg?_=29012)
+]
+
+&gt; CDC’s Influenza Division has collaborated each flu season with .tertiary[external researchers] on flu forecasting. &lt;br&gt;CDC has provided forecasting teams data, relevant public health forecasting targets, and forecast accuracy metrics while .tertiary[teams submit their forecasts], which are based on a variety of methods and data sources, each week.
+
+
+---
+
+## The Covid-19 Pandemic
+
+* CDC pivoted their Flu Challenge to Covid-19 in June 2020
+
+* Similar efforts in Germany and then Europe
+
+.pull-left[
+![](https://covid19forecasthub.org/images/forecast-hub-logo_DARKBLUE.png)
+]
+
+.pull-right[
+![:scale 50%](https://covid19forecasthub.eu/images/logo.svg)
+]
+
+
+* .secondary[Nothing similar for Canada]
+
+* CDC now has Flu and Covid simultaneously
+
+---
+
+## Why the Forecast Hubs?
+
+* Collect public forecasts in a standard format and visualize
+
+* Used internally by CDC
+
+* Turns out, most individual teams' forecasts are ... not great
+
+* Combine submissions into an "Ensemble"
+
+![https://doi.org/10.1371/journal.pcbi.1007486](pnas.png)
+
+---
+class: inverse, middle, center
+
+# Standard forecasting models
+
+
+
+---
+
+
+&lt;img src="gfx/submitted-hosp-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Quick overview of types
+
+.pull-left[
+* BPagano - SIR 
+
+* CMU - Time Series
+
+* Colorado (4 versions) - SEIR, different scenarios
+
+* Georgia Tech - Deep learning...
+
+* IHME (rarely) - SEIR
+
+* Johns Hopkins (3 in Applied Physics) - SEIR, Time series, ensemble
+
+* Johns Hopkins (other, Infection Dynamics) - SEIR
+]
+
+.pull-right[
+* Dean Karlen (Physicist at UVic) - SEIR type
+
+* MOBS-Gleam - Agent based mobility model
+
+* USC - SEIR
+
+* UVA - Ensemble of VAR, LSTM, SEIR
+
+* Prolix - "Offsets obtained by correlations, best linear approximation of reproduction rates (using vaccination  approximation) by least euclidean distance, and linear prediction."
+]
+
+
+.large.fourth-color[SIR-type]
+
+.large.tertiary[Time series]
+
+.secondary.large[Ensemble / Deep Learning / ML]
+
+---
+
+## Time series (simplification)
+
+&gt; On day `\(t\)`, model hospitalizations at day `\(t+a\)` as a function of today's hospitalizations and those in the recent past.
+
+
+.secondary[For example:]
+
+`$$\widehat{y}_{t+a} = a_{0} y_{t} + a_{7}y_{t-7} + a_{14} y_{t-14} + b_0 x_t + b_{7} x_{t-7}$$`
+
+.secondary[COVIDhub Baseline:]
+
+`$$\widehat{y}_{t+a} = y_{t}$$`
+
+* Seemingly, straightforward to do.
+* Performs surprisingly well, most of the time.
+* Not so good when you'd most want it to work.
+* Uses essentially no information about epidemics.
+
+
+
+---
+
+## SIR-type (compartmental) models - Stochastic Version
+
+
+
+.pull-left-wide[
+Suppose each of N people in a bucket at time t:
+
+1. .large[.primary[Susceptible(t)]] : not sick, but could get sick
+1. .large[.secondary[Infected(t)]] : sick, can make others sick
+1. .large[.tertiary[Removed(t)]] : either recovered or dead; not sick, can't get sick, can't make anyone sick
+
+
+
+&lt;hr&gt;
+
+
+**Assume**: During period h, each .primary[S] meets kh people.
+
+**Assume**: Prob( .primary[S] meets .secondary[I] and becomes .secondary[I] ) = c.
+
+.fourth-color[So]: Prob( .primary[S] `\(\rightarrow\)` .secondary[I] ) = `\(1 - (1 - c I(t)  / N )^{hk} \approx kchI(t) / N\)`
+
+.fourth-color[So]: New .secondary[I] in time h `\(\sim Binom(S(t),\ kchI(t) / N)\)`
+
+**Assume**: Prob( .secondary[I] `\(\rightarrow\)` .tertiary[R]) = `\(\gamma h\)` 
+
+.fourth-color[So]: new removals in time h `\(\sim Binom(I(t),\ \gamma h)\)`
+]
+
+.pull-right-narrow[
+
+<div id="htmlwidget-a67048a132096100379e" style="width:100%;height:144px;" class="widgetframe html-widget "></div>
+<script type="application/json" data-for="htmlwidget-a67048a132096100379e">{"x":{"url":"gfx//widgets/widget_sir-dag.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
+
+]
+
+
+
+---
+
+## SIR-type (compartmental) models - Stochastic Version
+
+.pull-left-wide[
+
+### Over-all equations:
+
+`\begin{aligned}
+C(t+h) &amp; =  \mathrm{Binom}\left(S(t),\ \frac{\beta}{N} h I(t)\right)\\
+D(t+h) &amp; =  \mathrm{Binom}\left(I(t),\ \gamma h\right)\\
+S(t+h) &amp; =  S(t) - C(t+h)\\
+I(t+h) &amp; =  I(t) + C(t+h) - D(t+h)\\
+R(t+h) &amp; =  R(t) + D(t+h)
+\end{aligned}`
+
+### In the deterministic limit, `\(N\rightarrow\infty,\ h\rightarrow 0\)`
+
+`\begin{aligned}
+N &amp;= S(0) + I(0) + R(0)\\
+\frac{dS}{dt} &amp; =  -\frac{\beta}{N} S(t)I(t)\\
+\frac{dI}{dt} &amp; =  \frac{\beta}{N} I(t)S(t) - \gamma I(t)\\
+\frac{dR}{dt} &amp; =  \gamma I(t)
+\end{aligned}`
+
+**"_the_ SIR model"** is often ambiguous between these
+
+]
+
+.pull-right-narrow[
+<div id="htmlwidget-2879c477db026b293f56" style="width:100%;height:252px;" class="widgetframe html-widget "></div>
+<script type="application/json" data-for="htmlwidget-2879c477db026b293f56">{"x":{"url":"gfx//widgets/widget_sir-dag-again.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
+
+]
+
+---
+
+## Data issues 
+
+- **Ideally** we'd see .large[.primary[S], .secondary[I], .tertiary[R]] at all times
+
+- Easier to observe new infections, .large[.secondary[I(t+h) - I(t)]]
+
+- Removals by death are easier to observe than removals by recovery,  
+  so we mostly see .large[.tertiary[(R(t+h) - R(t))] &amp;times; (death rate)]
+
+- The interval between measurements, say `\(\Delta\)`, is often `\(\gg h\)`
+
+- Measuring .large[.secondary[I(t)]] and .large[.tertiary[R(t)]] (or their rates of change) is hard 
+    + testing/reporting is sporadic and error prone
+    + Need to model test error (false positives, false negatives) _and_ who gets tested
+    + Need to model lag between testing and reporting
+    
+- Parameters (especially, `\(\beta\)`) change during the epidemic
+    + Changing behavior, changing policy, environmental factors, vaccines, variants, ...
+
+---
+
+## Connecting to Data
+
+
+- Likelihood calculations are straightforward if we can measure .large[.secondary[I(t)], .tertiary[R(t)]] at all times 0, h, 2h, &amp;hellip; T
+
+- Or .large[.secondary[I(0)]], .large[.tertiary[R(0)]] and all the increments .large[.secondary[I(t+h) - I(t)], .tertiary[R(t+h) - R(t)]]
+
+- Still have to optimize numerically
+
+- Likelihood calculations already become difficult if the time between observations `\(\Delta \gg h\)`
+    + Generally, `\(\Delta \approx\)` 1 day
+    + In principle, this just defines another Markov process, with a longer interval `\(\Delta\)` between steps, but to get the likelihood of a `\(\Delta\)` step we have to sum over all possible paths of `\(h\)` steps adding up to it
+
+- Other complications if we don't observe all the compartments, and/or have a lot of noise in our observations
+    + We don't and we do.
+
+
+
+
+---
+
+## Connecting to Data
+
+.pull-left[
+
+- Often more tractable to avoid likelihood  (Conditional least squares, simulation-based inference)
+
+- Intrinsic issue: Initially, everything just looks exponential
+    + So it's hard to discriminate between distinct models
+    + So even assuming an SIR model, it's easier to estimate `\(\beta - \gamma\)` than `\((\beta, \gamma)\)` or `\(\beta/\gamma\)`
+
+- Can sometimes **calibrate** or fix the parameters based on other sources
+    + E.g., `\(1/\gamma =\)` average time someone is infectious, which could be determined from clinical studies / observations
+]
+
+.pull-right[
+&lt;blockquote class="twitter-tweet"&gt;&lt;p lang="en" dir="ltr"&gt;I have been thinking about how different people interpret data differently. And made this xkcd style graphic to illustrate this. &lt;a href="https://t.co/a8LvlmZxT7"&gt;pic.twitter.com/a8LvlmZxT7&lt;/a&gt;&lt;/p&gt;&amp;mdash; Jens von Bergmann (@vb_jens) &lt;a href="https://twitter.com/vb_jens/status/1372251931444350976?ref_src=twsrc%5Etfw"&gt;March 17, 2021&lt;/a&gt;&lt;/blockquote&gt;
+]
+
+
+---
+
+## These models fit well "in sample"
+
+.pull-left[
+* Track observed cases closely (they should)
+
+* Can provide nuanced policy advice on some topics
+
+* Many questions depend on modulating `\(\beta\)`
+    1. What happens if we lock down?
+    2. What happens if we mask?
+    3. What happens if we have school online?
+    4. Vaccine passport?
+    
+* Vaccination modeling is easier, directly removes susceptibles
+
+* What about out-of-sample?
+]
+
+
+.pull-right[.center[
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:20em;width:20em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:orange;overflow:visible;position:relative;"><path d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zm32 224c0 17.7-14.3 32-32 32s-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32z"/></svg>
+]]
+
+---
+background-image: url("covidseir-fcast.pdf")
+background-position: center
+background-size: contain
+
+---
+background-image: url("pypm-fcast.pdf")
+background-position: center
+background-size: contain
+
+
+---
+class: inverse, middle, center
+
+# So how do they do?
+## Out-of-sample COVID Forecasting
+
+
+
+---
+
+## The forecast format
+
+
+
+* Various targets "incident deaths", "incident cases", "hospital admissions"
+
+* Produce point forecasts 
+
+* Quantiles to measure uncertainty (set of 23)
+
+* Predict 1-4 epiweeks ahead (or 1-28 days)
+
+
+
+&lt;img src="gfx/unnamed-chunk-1-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Forecast evaluation
+
+[Weighted Interval Score (Bracher et al., 2000)](https://arxiv.org/abs/2005.12881)
+
+`$$WIS = \frac{2}{K} \sum_{k=1}^K \max\{\tau_k (y - q_k), (1-\tau_k)(q_k - y)\}$$`
+
+.pull-left[
+* Calculated for each target   
+(forecast date, location, horizon)
+
+* For each Interval:
+    1. Width of interval.
+    1. Under prediction (AE to the top)
+    1. Over prediction (AE to the bottom)
+
+* Weighted average using probability content
+
+* Mathematically equivalent to an average of quantile losses
+
+* Discrete approximation of CRPS
+]
+
+.pull-right[
+
+&lt;img src="gfx/unnamed-chunk-2-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+## Comparing across space and time
+
+
+
+
+.pull-left[
+
+* Error proportional to cases
+
+* Large right skew
+
+* "Adjust" by scaling to a Baseline
+
+* Baseline is flat line + residual quantiles
+
+&lt;img src="gfx/wis-map-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+
+&lt;img src="gfx/wis-densities-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+
+## Performance over time (Incident Deaths)
+
+&lt;img src="gfx/death-scores-all-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Overall performance (Incident Deaths)
+#### All forecasters with at least 4 months of submissions
+
+&lt;img src="gfx/overall-death-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## What about Incident Cases?
+
+
+
+&lt;img src="gfx/overall-cases-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## What about Hospital Admissions?
+
+
+
+&lt;img src="gfx/overall-hosp-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: middle, center
+
+.h2[Live evaluation dashboard]
+
+&lt;https://delphi.cmu.edu/forecast-eval/&gt;
+
+
+---
+class: middle, center, inverse
+
+# Gaps in forecasting
+
+---
+
+## Predicting surges in Florida
+
+&lt;iframe src="https://ubc-stat-dajmcdon.shinyapps.io/fl-fcast-visualizer/" width="100%" height="700px" style="border:none"&gt;&lt;/iframe&gt;
+
+---
+
+## PI Coverage
+
+&lt;img src="gfx/coverage-plot-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## The terrible case of Ohio
+
+
+
+---
+
+## The terrible case of Ohio
+
+&lt;img src="gfx/plot-oh-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## The terrible case of Ohio
+
+&lt;img src="gfx/bad-forecast-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, middle, center
+
+# Forecasting lessons
+
+---
+
+## Forecasting lessons
+
+Human in the loop
+
+&lt;img src="manual-corrections.png" width="100%" height="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Forecasting lessons
+
+Human in the loop
+
+&lt;img src="quality-control.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Forecasting lessons
+
+
+Simple models [M, Bien, Green, Hu, ..., Tibshirani](http://medrxiv.org/content/10.1101/2021.06.22.21259346v1)
+
+
+
+&lt;img src="gfx/add-hrr-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+
+
+---
+class: middle, inverse, center
+
+# Thoughts and thanks
+
+---
+
+## Thoughts without pictures
+
+.pull-left[
+
+* **Data is trouble**
+    1. Both groups spend lots of time dealing with this
+    2. Nowcasting
+    3. Low SNR
+    4. Very nonstationary
+    
+* **Forecast evaluation is not settled**
+    1. WIS is equivalent to quantile loss, should use that.
+    2. Not optimized to predict turning points. 
+    3. How do we create ensembles?
+
+]
+
+.pull-right[
+
+* **Hugely important to backtest properly**
+    1. Data is constantly revised
+    2. We see up to 10% "improvement" if we use finalized data
+    3. Bigger deal in the US
+
+* **Understanding the spatio-temporal dynamics is open**
+    1. How do "waves" propagate?
+    2. How important is mixing?
+    3. Effects of schooling?
+    4. Seasonality?
+    
+* **True Counterfactual causal inference is open**
+
+* **Massive survey dataset**
+
+]
+
+---
+
+## Delphi data
+
+![](covidcast_indicators.svg)
+
+---
+
+## Many thanks
+
+* Jens, Dean, Dan, Sally and [BC COVID Modelling group](https://bccovid-19group.ca)
+
+* Jacob, Ryan, Rob, Larry, Valerie, Addison, Alden, Ken, Mike, Jed and the rest of [Delphi](https://delphi.cmu.edu/)
+
+* Shuyi, Wei (UBC Stat), Bryn (UBC Stat / BCCOVID)
+
+* Funding from NSERC, CANSSI
+
+* I get to benefit from the results of funding from Google, Facebook, Amazon, Change Healthcare, Quidel, SafeGraph, Qualtrics (you can too!)
+
+* Forecast evaluation from [Reich Lab](http://covid19forecasthub.org) and [Delphi](https://delphi.cmu.edu/forecast-eval/)
+
+&lt;hr&gt;
+
+--
+
+
+.center[
+
+**Questions**
+
+On these or other issues.
+]
+
+---
+class: middle, center, inverse
+
+# Extras
+
+
+---
+
+
+
+&lt;img src="gfx/sim-sir-plot-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+---
+
+## `{epiprocess}`
+
+&lt;https://cmu-delphi.github.io/epiprocess/&gt;
+
+1. Data types
+
+    * `epi_df` &amp;mdash; basically a `data.frame` but with important meta information
+        1. `as_of` tag to denote the data vintage
+        2. time type
+        3. geo type
+        4. additional keys (e.g., age, gender, race)
+    * `epi_archive` &amp;mdash; a collection of `epi_df`s of different vintages
+        * But stored so as to eliminate redundancies
+        * Allows for important operations (filling, merging, snapshots,  )
+        
+2. Fundamental functionality &amp;mdash; the `slide()`
+
+    * Rolling correlations
+    * Moving averages
+    * outlier correction
+    * arbitrary functions
+    
+---
+
+## Example of `slide()`
+
+
+
+
+```r
+x &lt;- x %&gt;%  # covid cases in 2 locations downloaded with `{epidatr}`
+  group_by(geo_value) %&gt;% 
+  mutate(smooth_spline = growth_rate(time_value, cases, method = "smooth_spline"),
+         trend_filter = growth_rate(time_value, cases, method = "trend_filter"))
+```
+
+&lt;img src="gfx/unnamed-chunk-7-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Examining an `epi_archive`
+
+&lt;img src="gfx/unnamed-chunk-8-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+* Easy to inspect revision behaviour
+* Can use it for pseudo-prospective forecasts
+* Compare to our procedure for the PNAS article &amp;mdash; store every version as a `.csv` and load them individually
+
+---
+class: middle, center, inverse
+
+# `{epipredict}`
+
+&lt;https://cmu-delphi.github.io/epipredict&gt;
+
+---
+
+## Goals
+
+1.  A set of basic, easy-to-use forecasters that work out of the box.
+    You should be able to do a reasonably limited amount of
+    customization on them. 
+    -   Baseline flat-line forecaster
+    -   Autoregressive forecaster
+    -   Autoregressive classifier 
+    
+2.  A .secondary[framework] for creating custom forecasters out of modular
+    components. 
+    
+
+### Users
+
+.secondary[Basic.] Has data, calls forecaster with default arguments.
+
+.secondary[Intermediate.] Wants to examine changes to the arguments, take advantage of built in flexibility.
+
+.secondary[Advanced.] Wants to write their own forecasters. Maybe willing to build up from some components that we write.
+
+---
+
+## Basic autoregressive forecaster
+
+* Predict `deaths` 1-week ahead on 0, 7, 14 day lags of cases and deaths. 
+* Use `lm`, produce intervals with residual quantiles.
+
+
+```r
+library(epipredict)
+jhu &lt;- case_death_rate_subset %&gt;% filter(time_value &gt; max(time_value) - 60)
+canned &lt;- arx_forecaster(jhu, outcome = "death_rate", 
+                         predictors = c("case_rate", "death_rate"))
+canned$predictions
+```
+
+```
+## An `epi_df` object, 56 x 6 with metadata:
+## * geo_type  = state
+## * time_type = day
+## * as_of     = 2022-05-31 12:08:25
+## 
+## # A tibble: 56 × 6
+##    geo_value time_value  .pred         .pred_distn forecast_date target_date
+##  * &lt;chr&gt;     &lt;date&gt;      &lt;dbl&gt;              &lt;dist&gt; &lt;date&gt;        &lt;date&gt;     
+##  1 ak        2021-12-31 0.397  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+##  2 al        2021-12-31 0.262  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+##  3 ar        2021-12-31 0.410  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+##  4 as        2021-12-31 0.0983 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+##  5 az        2021-12-31 0.610  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+##  6 ca        2021-12-31 0.283  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+##  7 co        2021-12-31 0.500  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+##  8 ct        2021-12-31 0.518  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+##  9 dc        2021-12-31 0.797  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+## 10 de        2021-12-31 0.605  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
+## # … with 46 more rows
+```
+
+---
+
+
+```r
+minor_changes &lt;- arx_forecaster(
+  jhu, outcome = "death_rate", predictors = c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    ahead = 14, lags = list(c(0:4, 7, 14), c(0, 7, 14)),
+    levels = c(0.05, 1:9/10, 0.95),
+    quantile_by_key = "geo_value"
+  )
+)
+minor_changes$predictions
+```
+
+```
+## An `epi_df` object, 56 x 6 with metadata:
+## * geo_type  = state
+## * time_type = day
+## * as_of     = 2022-05-31 12:08:25
+## 
+## # A tibble: 56 × 6
+##    geo_value time_value  .pred         .pred_distn forecast_date target_date
+##  * &lt;chr&gt;     &lt;date&gt;      &lt;dbl&gt;              &lt;dist&gt; &lt;date&gt;        &lt;date&gt;     
+##  1 ak        2021-12-31 0.567  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+##  2 al        2021-12-31 0.535  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+##  3 ar        2021-12-31 0.637  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+##  4 as        2021-12-31 0.0824 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+##  5 az        2021-12-31 0.730  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+##  6 ca        2021-12-31 0.528  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+##  7 co        2021-12-31 0.791  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+##  8 ct        2021-12-31 0.944  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+##  9 dc        2021-12-31 1.91   [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+## 10 de        2021-12-31 0.932  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
+## # … with 46 more rows
+```
+
+
+---
+
+### Use random forests instead
+
+
+```r
+rf &lt;- arx_forecaster(
+  jhu, outcome = "death_rate", predictors = c("case_rate", "death_rate"),
+  trainer = parsnip::rand_forest(mode = "regression"), # use ranger
+  args_list = arx_args_list(
+    ahead = 14, lags = list(c(0:4, 7, 14), c(0, 7, 14)),
+    levels = c(0.05, 1:9/10, 0.95),
+    quantile_by_key = "geo_value"
+  )
+)
+```
+
+
+### Or boosting
+
+
+```r
+xgb &lt;- arx_forecaster(
+  jhu, outcome = "death_rate", predictors = c("case_rate", "death_rate"),
+  trainer = parsnip::boost_tree(mode = "regression", trees = 20), # use xgboost
+  args_list = arx_args_list(
+    ahead = 14, lags = list(c(0:4, 7, 14), c(0, 7, 14)),
+    levels = c(0.05, 1:9/10, 0.95),
+    quantile_by_key = "geo_value"
+  )
+) 
+```
+
+---
+
+## Examine the model
+
+
+```r
+lmobj &lt;- extract_fit_engine(canned$epi_workflow)
+summary(lmobj)
+```
+
+```
+## 
+## Call:
+## stats::lm(formula = ..y ~ ., data = data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.7765 -0.1306 -0.0672  0.0418  5.5405 
+## 
+## Coefficients:
+##                     Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)        0.0969996  0.0203483   4.767 1.99e-06 ***
+## lag_0_case_rate   -0.0006036  0.0005340  -1.130    0.258    
+## lag_7_case_rate    0.0048879  0.0007233   6.758 1.79e-11 ***
+## lag_14_case_rate   0.0005412  0.0009426   0.574    0.566    
+## lag_0_death_rate   0.1348263  0.0232453   5.800 7.59e-09 ***
+## lag_7_death_rate   0.1235735  0.0236657   5.222 1.94e-07 ***
+## lag_14_death_rate  0.1427953  0.0244890   5.831 6.33e-09 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.4701 on 2177 degrees of freedom
+## Multiple R-squared:  0.1591,	Adjusted R-squared:  0.1568 
+## F-statistic: 68.67 on 6 and 2177 DF,  p-value: &lt; 2.2e-16
+```
+
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="src/macros.js"></script>
+<script src="https://unpkg.com/shiki"></script>
+<script src="src/shiki-addon.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"slideNumber": true,
+"countIncrementalSlides": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
