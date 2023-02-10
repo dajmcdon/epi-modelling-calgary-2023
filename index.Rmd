@@ -475,7 +475,7 @@ ca_traj
 
 [Weighted Interval Score (Bracher et al., 2000)](https://arxiv.org/abs/2005.12881)
 
-$$WIS = \frac{2}{K} \sum_{k=1}^K \max\{\tau_k (y - q_k), (1-\tau_k)(q_k - y)\}$$
+$$WIS = \frac{2}{K} \sum_{k=1}^K \max\{\tau_k (y - q_k),\ (1-\tau_k)(q_k - y)\}$$
 
 .pull-left[
 * Calculated for each target   
