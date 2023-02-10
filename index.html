@@ -47,10 +47,18 @@ background-position: top
 
 &lt;br&gt;
 
+.pull-left[
 ###Daniel J. McDonald
 ###University of British Columbia
 #### &amp;nbsp;10 February 2023
+]
 
+
+
+.pull-right.center[
+![:scale 30%](gfx/qrcodes-1.png)
+&lt;br&gt;
+]
 ---
 
 ## Mathematical modelling of disease / epidemics is very old 
@@ -113,7 +121,25 @@ background-position: top
 
 * Combine submissions into an "Ensemble"
 
-![https://doi.org/10.1371/journal.pcbi.1007486](pnas.png)
+![https://doi.org/10.1371/journal.pcbi.1007486](gfx/pnas.png)
+
+---
+
+# Outline
+
+.large[
+.tertiary[0.] .grey[History and background]
+
+.tertiary[1.] Standard forecasting models.
+
+.tertiary[2.] Forecast evaluation
+
+.tertiary[3.] Gaps in forecasting
+
+.tertiary[4.] Some lessons learned
+
+.tertiary[5.] Software for the community
+]
 
 ---
 class: inverse, middle, center
@@ -267,7 +293,7 @@ N &amp;= S(0) + I(0) + R(0)\\
 
 ## Data issues 
 
-- **Ideally** we'd see .large[.primary[S], .secondary[I], .tertiary[R]] at all times
+- .tertiary[Ideally] we'd see .large[.primary[S], .secondary[I], .tertiary[R]] at all times
 
 - Easier to observe new infections, .large[.secondary[I(t+h) - I(t)]]
 
@@ -352,20 +378,39 @@ N &amp;= S(0) + I(0) + R(0)\\
 ]]
 
 ---
-background-image: url("covidseir-fcast.pdf")
-background-position: center
-background-size: contain
+
+## What does this "look like"?
+
+
+
+```r
+sim_SIR &lt;- function(TT, N = 1000, beta = .1, gamma = .01) {
+  S &lt;- double(TT); I &lt;- double(TT); R &lt;- double(TT)
+  S[1] &lt;- N - 1; I[1] &lt;- 1; R[1] &lt;- 0
+  for (tt in 2:TT) {
+    contagions &lt;- rbinom(1, size = S[tt - 1], prob = beta * I[tt - 1] / N)
+    removals &lt;- rbinom(1, size = I[tt - 1], prob = gamma)
+    S[tt] &lt;- S[tt - 1] - contagions
+    I[tt] &lt;- I[tt - 1] + contagions - removals
+    R[tt] &lt;- R[tt - 1] + removals
+  }
+  tibble(S = S, I = I, R = R, time = 1:TT)
+}
+```
 
 ---
-background-image: url("pypm-fcast.pdf")
-background-position: center
-background-size: contain
+
+## What does this "look like"?
+
+
+&lt;img src="gfx/sim-sir-plot-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
 
 
 ---
 class: inverse, middle, center
 
-# So how do they do? &lt;br&gt; Out-of-sample COVID Forecasting
+# So how do they do? &lt;br&gt;&lt;br&gt; Out-of-sample COVID Forecasting
 
 
 
@@ -375,13 +420,13 @@ class: inverse, middle, center
 
 
 
-* Various targets "incident deaths", "incident cases", "hospital admissions"
+* Various targets .secondary[incident deaths], .tertiary[incident cases], .fourth-color[hospital admissions]
 
 * Produce point forecasts 
 
 * Quantiles to measure uncertainty (set of 23)
 
-* Predict 1-4 epiweeks ahead (or 1-28 days)
+* Predict 1&amp;ndash;4 epiweeks or 1&amp;ndash;28 days ahead
 
 
 
@@ -455,7 +500,6 @@ class: inverse, middle, center
 ---
 
 ## Overall performance (Incident Deaths)
-#### All forecasters with at least 4 months of submissions
 
 &lt;img src="gfx/overall-death-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
 
@@ -479,7 +523,7 @@ class: inverse, middle, center
 ---
 class: middle, center, h2
 
-Live evaluation dashboard
+.large[Live evaluation dashboard]
 
 &lt;https://delphi.cmu.edu/forecast-eval/&gt;
 
@@ -527,7 +571,7 @@ class: inverse, middle, center
 
 Human in the loop
 
-&lt;img src="manual-corrections.png" width="100%" height="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="gfx/manual-corrections.png" width="100%" height="90%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -535,7 +579,7 @@ Human in the loop
 
 Human in the loop
 
-&lt;img src="quality-control.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="gfx/quality-control.png" width="90%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -551,13 +595,13 @@ Simple models [M, Bien, Green, Hu, ..., Tibshirani](http://medrxiv.org/content/1
 ---
 class: inverse, middle, center
 
-# Software for signal processing and simple models
+# Software: signal processing and simple models
 
 ---
 
 ## `{epiprocess}`
 
-&lt;https://cmu-delphi.github.io/epiprocess/&gt;
+.secondary[&lt;https://cmu-delphi.github.io/epiprocess/&gt;]
 
 1. Data types
 
@@ -573,8 +617,11 @@ class: inverse, middle, center
 2. Fundamental functionality &amp;mdash; the `slide()`
 
     * Rolling correlations
+    
     * Moving averages
+    
     * outlier correction
+    
     * arbitrary functions
     
 ---
@@ -643,13 +690,11 @@ class: middle, center, inverse
 
 ### .tertiary[A set of basic, easy-to-use forecasters that work out of the box.]
     
-You should be able to do a reasonably limited amount of
-customization on them. For the basic forecasters, we currently
-provide:
+You can do a limited amount of customization. We currently provide:
 
 - Baseline flat-line forecaster
 
-- Autoregressive forecaster
+- Autoregressive forecaster (not an "AR" model, you don't want this)
 
 - Autoregressive classifier
 
@@ -663,7 +708,7 @@ provide:
 
 4. .secondary[Postprocessor]: do things to the predictions before returning
 
-### .secondary[A very specialized plug-in to `{tidymodels}`]
+.tertiary[A very specialized plug-in to `{tidymodels}`]
 
 ---
 
@@ -713,7 +758,8 @@ rf &lt;- arx_forecaster(
   jhu, outcome = "death_rate", predictors = c("case_rate", "death_rate"),
   trainer = parsnip::rand_forest(mode = "regression"), # use ranger
   args_list = arx_args_list(
-    ahead = 14, lags = list(c(0:4, 7, 14), c(0, 7, 14)),
+    ahead = 14, 
+    lags = list(c(0:4, 7, 14), c(0, 7, 14)),
     levels = c(0.05, 1:9/10, 0.95),
     quantile_by_key = "geo_value"
   )
@@ -729,7 +775,8 @@ xgb &lt;- arx_forecaster(
   jhu, outcome = "death_rate", predictors = c("case_rate", "death_rate"),
   trainer = parsnip::boost_tree(mode = "regression", trees = 20), # use xgboost
   args_list = arx_args_list(
-    ahead = 14, lags = list(c(0:4, 7, 14), c(0, 7, 14)),
+    ahead = 14, 
+    lags = list(c(0:4, 7, 14), c(0, 7, 14)),
     levels = c(0.05, 1:9/10, 0.95),
     quantile_by_key = "geo_value"
   )
@@ -738,40 +785,71 @@ xgb &lt;- arx_forecaster(
 
 ---
 
+## Code a forecaster by hand
+
+
+```r
+# A preprocessing recipe describing how to turn raw data into features / response
+r &lt;- epi_recipe(jhu) %&gt;%
+  step_epi_lag(case_rate, lag = c(0, 1, 2, 3, 7, 14)) %&gt;%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) %&gt;%
+  step_epi_ahead(death_rate, ahead = 14) %&gt;%
+  step_epi_naomit()
+
+# A postprocessing routine describing what to do to the predictions
+f &lt;- frosting() %&gt;%
+  layer_predict() %&gt;%
+  layer_threshold(starts_with(".pred"), lower = 0) %&gt;%
+  # predictions/intervals should be non-negative
+  layer_add_target_date(target_date = max(jhu$time_value) + 14)
+
+# Bundle up the preprocessor, training engine, and postprocessor
+ewf &lt;- epi_workflow(r, quantile_reg(tau = c(.1, .5, .9)), f)
+
+# Fit it to some data (we could fit this to ANY data that has the same format)
+trained_ewf &lt;- ewf %&gt;% fit(jhu)
+
+# examines the recipe to determine what we need to make the prediction
+latest &lt;- get_test_data(r, jhu)
+preds &lt;- trained_ewf %&gt;% predict(new_data = latest)
+```
+
+---
+
 ## Examine the model
 
 
 ```r
-lmobj &lt;- extract_fit_engine(canned$epi_workflow)
-summary(lmobj)
+extract_fit_engine(trained_ewf)
 ```
 
 ```
-## 
 ## Call:
-## stats::lm(formula = ..y ~ ., data = data)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -1.7765 -0.1306 -0.0672  0.0418  5.5405 
+## quantreg::rq(formula = ..y ~ ., tau = ~c(0.1, 0.5, 0.9), data = data, 
+##     na.action = function (object, ...) 
+##     UseMethod("na.omit"), method = "br", model = FALSE)
 ## 
 ## Coefficients:
-##                     Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)        0.0969996  0.0203483   4.767 1.99e-06 ***
-## lag_0_case_rate   -0.0006036  0.0005340  -1.130    0.258    
-## lag_7_case_rate    0.0048879  0.0007233   6.758 1.79e-11 ***
-## lag_14_case_rate   0.0005412  0.0009426   0.574    0.566    
-## lag_0_death_rate   0.1348263  0.0232453   5.800 7.59e-09 ***
-## lag_7_death_rate   0.1235735  0.0236657   5.222 1.94e-07 ***
-## lag_14_death_rate  0.1427953  0.0244890   5.831 6.33e-09 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+##                        tau= 0.1      tau= 0.5      tau= 0.9
+## (Intercept)       -8.982762e-03 -0.0006293589 -0.0003799987
+## lag_0_case_rate    2.062774e-03  0.0022135082  0.0010485960
+## lag_1_case_rate   -9.368519e-05 -0.0002539653  0.0005056500
+## lag_2_case_rate    3.388688e-04  0.0001240708  0.0017839004
+## lag_3_case_rate    3.455396e-04  0.0001238113  0.0002803659
+## lag_7_case_rate   -4.971177e-04  0.0004952626  0.0002953601
+## lag_14_case_rate   2.430204e-03  0.0040881872  0.0037889962
+## lag_0_death_rate   2.620076e-02  0.1620189335  0.2056693415
+## lag_7_death_rate   3.524037e-02  0.1224601311  0.4249898859
+## lag_14_death_rate  4.888930e-02  0.1396515777  0.4339184700
 ## 
-## Residual standard error: 0.4701 on 2177 degrees of freedom
-## Multiple R-squared:  0.1591,	Adjusted R-squared:  0.1568 
-## F-statistic: 68.67 on 6 and 2177 DF,  p-value: &lt; 2.2e-16
+## Degrees of freedom: 1792 total; 1782 residual
 ```
 
+---
+
+## Plot the forecasts at some locations
+
+&lt;img src="gfx/unnamed-chunk-20-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: middle, inverse, center
@@ -780,20 +858,21 @@ class: middle, inverse, center
 
 ---
 
-## Thoughts without pictures
+## Some concluding thoughts 
 
 .pull-left[
 
 * **Data is trouble**
-    1. Both groups spend lots of time dealing with this
-    2. Nowcasting
-    3. Low SNR
-    4. Very nonstationary
+    1. We've spent lots of time trying to make data available
+    2. Even when Public Health doesn't cooperate
+    3. Nowcasting
+    4. Low SNR
+    5. Very nonstationary
     
 * **Forecast evaluation is not settled**
-    1. WIS is equivalent to quantile loss, should use that.
-    2. Not optimized to predict turning points. 
-    3. How do we create ensembles?
+    1. Not optimized to predict turning points. 
+    2. How do we create ensembles?
+    3. Better to predict squishy concepts: "surge", "upswing", "big upswing"?
 
 ]
 
@@ -802,297 +881,47 @@ class: middle, inverse, center
 * **Hugely important to backtest properly**
     1. Data is constantly revised
     2. We see up to 10% "improvement" if we use finalized data
-    3. Bigger deal in the US
 
 * **Understanding the spatio-temporal dynamics is open**
     1. How do "waves" propagate?
     2. How important is mixing?
-    3. Effects of schooling?
-    4. Seasonality?
+    3. Seasonality?
+    4. Effects of NPIs?
     
 * **True Counterfactual causal inference is open**
 
-* **Massive survey dataset**
+* **We have a massive survey dataset**
 
 ]
 
----
+&lt;hr&gt;
 
-## Delphi data
-
-![](covidcast_indicators.svg)
+.tertiary.center.large[We're building software so others can use it.]
 
 ---
 
 ## Many thanks
 
+* Ryan, Logan, Addison, Rob, Larry, Valerie, Alden, and the rest of [Delphi](https://delphi.cmu.edu/)
+
 * Jens, Dean, Dan, Sally and [BC COVID Modelling group](https://bccovid-19group.ca)
 
-* Jacob, Ryan, Rob, Larry, Valerie, Addison, Alden, Ken, Mike, Jed and the rest of [Delphi](https://delphi.cmu.edu/)
+* Funding to me from NSERC, CANSSI
 
-* Shuyi, Wei (UBC Stat), Bryn (UBC Stat / BCCOVID)
-
-* Funding from NSERC, CANSSI
-
-* I get to benefit from the results of funding from Google, Facebook, Amazon, Change Healthcare, Quidel, SafeGraph, Qualtrics (you can too!)
+* I get to benefit from the results of funding from Google, Facebook, Amazon, Change Healthcare, Quidel, SafeGraph, Qualtrics, CDC, CSTE
 
 * Forecast evaluation from [Reich Lab](http://covid19forecasthub.org) and [Delphi](https://delphi.cmu.edu/forecast-eval/)
 
 &lt;hr&gt;
 
---
-
+&lt;br&gt;&lt;br&gt;
 
 .center[
 
-**Questions**
+.tertiary.large[Questions?]
 
 On these or other issues.
 ]
-
----
-class: middle, center, inverse
-
-# Extras
-
-
----
-
-
-
-&lt;img src="gfx/sim-sir-plot-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
-
-
-
-
----
-
-## `{epiprocess}`
-
-&lt;https://cmu-delphi.github.io/epiprocess/&gt;
-
-1. Data types
-
-    * `epi_df` &amp;mdash; basically a `data.frame` but with important meta information
-        1. `as_of` tag to denote the data vintage
-        2. time type
-        3. geo type
-        4. additional keys (e.g., age, gender, race)
-    * `epi_archive` &amp;mdash; a collection of `epi_df`s of different vintages
-        * But stored so as to eliminate redundancies
-        * Allows for important operations (filling, merging, snapshots,  )
-        
-2. Fundamental functionality &amp;mdash; the `slide()`
-
-    * Rolling correlations
-    * Moving averages
-    * outlier correction
-    * arbitrary functions
-    
----
-
-## Example of `slide()`
-
-
-
-
-```r
-x &lt;- x %&gt;%  # covid cases in 2 locations downloaded with `{epidatr}`
-  group_by(geo_value) %&gt;% 
-  mutate(smooth_spline = growth_rate(time_value, cases, method = "smooth_spline"),
-         trend_filter = growth_rate(time_value, cases, method = "trend_filter"))
-```
-
-&lt;img src="gfx/unnamed-chunk-20-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
-
----
-
-## Examining an `epi_archive`
-
-&lt;img src="gfx/unnamed-chunk-21-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
-
-* Easy to inspect revision behaviour
-* Can use it for pseudo-prospective forecasts
-* Compare to our procedure for the PNAS article &amp;mdash; store every version as a `.csv` and load them individually
-
----
-class: middle, center, inverse
-
-# `{epipredict}`
-
-&lt;https://cmu-delphi.github.io/epipredict&gt;
-
----
-
-## Goals
-
-1.  A set of basic, easy-to-use forecasters that work out of the box.
-    You should be able to do a reasonably limited amount of
-    customization on them. 
-    -   Baseline flat-line forecaster
-    -   Autoregressive forecaster
-    -   Autoregressive classifier 
-    
-2.  A .secondary[framework] for creating custom forecasters out of modular
-    components. 
-    
-
-### Users
-
-.secondary[Basic.] Has data, calls forecaster with default arguments.
-
-.secondary[Intermediate.] Wants to examine changes to the arguments, take advantage of built in flexibility.
-
-.secondary[Advanced.] Wants to write their own forecasters. Maybe willing to build up from some components that we write.
-
----
-
-## Basic autoregressive forecaster
-
-* Predict `deaths` 1-week ahead on 0, 7, 14 day lags of cases and deaths. 
-* Use `lm`, produce intervals with residual quantiles.
-
-
-```r
-library(epipredict)
-jhu &lt;- case_death_rate_subset %&gt;% filter(time_value &gt; max(time_value) - 60)
-canned &lt;- arx_forecaster(jhu, outcome = "death_rate", 
-                         predictors = c("case_rate", "death_rate"))
-canned$predictions
-```
-
-```
-## An `epi_df` object, 56 x 6 with metadata:
-## * geo_type  = state
-## * time_type = day
-## * as_of     = 2022-05-31 12:08:25
-## 
-## # A tibble: 56 × 6
-##    geo_value time_value  .pred         .pred_distn forecast_date target_date
-##  * &lt;chr&gt;     &lt;date&gt;      &lt;dbl&gt;              &lt;dist&gt; &lt;date&gt;        &lt;date&gt;     
-##  1 ak        2021-12-31 0.397  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-##  2 al        2021-12-31 0.262  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-##  3 ar        2021-12-31 0.410  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-##  4 as        2021-12-31 0.0983 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-##  5 az        2021-12-31 0.610  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-##  6 ca        2021-12-31 0.283  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-##  7 co        2021-12-31 0.500  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-##  8 ct        2021-12-31 0.518  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-##  9 dc        2021-12-31 0.797  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-## 10 de        2021-12-31 0.605  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 
-## # … with 46 more rows
-```
-
----
-
-
-```r
-minor_changes &lt;- arx_forecaster(
-  jhu, outcome = "death_rate", predictors = c("case_rate", "death_rate"),
-  args_list = arx_args_list(
-    ahead = 14, lags = list(c(0:4, 7, 14), c(0, 7, 14)),
-    levels = c(0.05, 1:9/10, 0.95),
-    quantile_by_key = "geo_value"
-  )
-)
-minor_changes$predictions
-```
-
-```
-## An `epi_df` object, 56 x 6 with metadata:
-## * geo_type  = state
-## * time_type = day
-## * as_of     = 2022-05-31 12:08:25
-## 
-## # A tibble: 56 × 6
-##    geo_value time_value  .pred         .pred_distn forecast_date target_date
-##  * &lt;chr&gt;     &lt;date&gt;      &lt;dbl&gt;              &lt;dist&gt; &lt;date&gt;        &lt;date&gt;     
-##  1 ak        2021-12-31 0.567  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-##  2 al        2021-12-31 0.535  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-##  3 ar        2021-12-31 0.637  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-##  4 as        2021-12-31 0.0824 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-##  5 az        2021-12-31 0.730  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-##  6 ca        2021-12-31 0.528  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-##  7 co        2021-12-31 0.791  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-##  8 ct        2021-12-31 0.944  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-##  9 dc        2021-12-31 1.91   [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-## 10 de        2021-12-31 0.932  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 
-## # … with 46 more rows
-```
-
-
----
-
-### Use random forests instead
-
-
-```r
-rf &lt;- arx_forecaster(
-  jhu, outcome = "death_rate", predictors = c("case_rate", "death_rate"),
-  trainer = parsnip::rand_forest(mode = "regression"), # use ranger
-  args_list = arx_args_list(
-    ahead = 14, lags = list(c(0:4, 7, 14), c(0, 7, 14)),
-    levels = c(0.05, 1:9/10, 0.95),
-    quantile_by_key = "geo_value"
-  )
-)
-```
-
-
-### Or boosting
-
-
-```r
-xgb &lt;- arx_forecaster(
-  jhu, outcome = "death_rate", predictors = c("case_rate", "death_rate"),
-  trainer = parsnip::boost_tree(mode = "regression", trees = 20), # use xgboost
-  args_list = arx_args_list(
-    ahead = 14, lags = list(c(0:4, 7, 14), c(0, 7, 14)),
-    levels = c(0.05, 1:9/10, 0.95),
-    quantile_by_key = "geo_value"
-  )
-) 
-```
-
----
-
-## Examine the model
-
-
-```r
-lmobj &lt;- extract_fit_engine(canned$epi_workflow)
-summary(lmobj)
-```
-
-```
-## 
-## Call:
-## stats::lm(formula = ..y ~ ., data = data)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -1.7765 -0.1306 -0.0672  0.0418  5.5405 
-## 
-## Coefficients:
-##                     Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)        0.0969996  0.0203483   4.767 1.99e-06 ***
-## lag_0_case_rate   -0.0006036  0.0005340  -1.130    0.258    
-## lag_7_case_rate    0.0048879  0.0007233   6.758 1.79e-11 ***
-## lag_14_case_rate   0.0005412  0.0009426   0.574    0.566    
-## lag_0_death_rate   0.1348263  0.0232453   5.800 7.59e-09 ***
-## lag_7_death_rate   0.1235735  0.0236657   5.222 1.94e-07 ***
-## lag_14_death_rate  0.1427953  0.0244890   5.831 6.33e-09 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 0.4701 on 2177 degrees of freedom
-## Multiple R-squared:  0.1591,	Adjusted R-squared:  0.1568 
-## F-statistic: 68.67 on 6 and 2177 DF,  p-value: &lt; 2.2e-16
-```
-
-
-
-
 
 
     </textarea>

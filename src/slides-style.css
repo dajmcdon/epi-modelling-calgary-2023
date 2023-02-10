@@ -51,6 +51,9 @@ h1, h2, h3 {
 .light-ter {color: var(--light_ter)}
 .light-fou {color: var(--light_fou);}
 
+a {
+  color: var(--secondary);
+}
 
 /* Font sizes */
 .larger { font-size: 400% }
@@ -263,11 +266,4 @@ div.my-footer span {
   font-size: 300%;
 }
 
-.const {color: #5E3C99;}
-.accel {color: #B2ABD2;}
-.decel {color: #FDB863;}
-.stress {color: #E66101;}
-.red { color: #FF4900; }
-.dark-blue { color: #053B64;}
-.green { color: #00884E; }
-.yellow { color: yellow; }
+.grey {color: #aaaaaa;}
